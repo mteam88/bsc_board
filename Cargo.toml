@@ -1,0 +1,13 @@
+[package]
+name = "bsc_board"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ethers = "2.0.2"
+ethers-providers = "2.0.2"
+eyre = "0.6.8"
+hyper = "0.14.25"
+tokio = { version = "1.27.0", features = ["full"] }
