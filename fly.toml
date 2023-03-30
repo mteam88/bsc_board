@@ -1,0 +1,24 @@
+# fly.toml file generated for bsc-board on 2023-03-29T16:40:59-04:00
+
+app = "bsc-board"
+kill_signal = "SIGINT"
+kill_timeout = 5
+primary_region = "den"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20

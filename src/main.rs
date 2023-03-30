@@ -39,7 +39,7 @@ async fn is_upgrade(tx: Transaction) -> bool {
         return false;
     }
     // tx.input[0] == 169
-    tx.input[0..4] == [0x2b, 0x92, 0xa1, 0x22]
+    tx.input[0..4] == 0x99a88ec4_u32.to_be_bytes()
 }
 
 async fn dispatch_upgrade(hash: H256) -> Result<()> {
