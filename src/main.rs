@@ -2,7 +2,7 @@ mod dweet;
 
 use ethers::{
     providers::{Middleware, Provider},
-    types::Transaction,
+    types::Transaction, abi::AbiEncode,
 };
 use ethers_providers::{Http, ProviderExt, StreamExt};
 use eyre::Result;
@@ -10,7 +10,11 @@ use eyre::Result;
 const UPGRADE_SELECTOR: [u8; 4] = 0x99a88ec4_u32.to_be_bytes();
 
 // blocklist set of addresses
-const BLOCKLIST: [&str; 1] = ["0x3852f27ff39e66004b223501f9d24d480b6af3c9"];
+const BLOCKLIST: [&str; 3] = [
+    "0x3852f27ff39e66004b223501f9d24d480b6af3c9",
+    "0x27310b0c0a54b0ea31efb02c6231498b59383f89",
+    "0xb898d9900688eb9aeeb91b4328100343989434c6"
+];
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,12 +38,15 @@ async fn digest(tx: Transaction) -> Result<()> {
     // do something with tx
     let hash = tx.hash;
     // check if tx is a contract upgrade
-    if !(tx.input.len() < 4) || tx.input[0..4] == UPGRADE_SELECTOR || tx.to == None {
+    if tx.input.len() < 4 {
+        return Ok(());
+    }
+    if tx.input[0..4] == UPGRADE_SELECTOR || tx.to == None {
         if tx.input[0..4] == UPGRADE_SELECTOR {
             // if tx is a contract upgrade, dispatch immediately
-            dispatch_upgrade(format!("upgrade:{}", hash.to_string())).await?;
+            dispatch_upgrade(format!("upgrade:{}", hash.encode_hex())).await?;
         } else if tx.to == None || !BLOCKLIST.contains(&tx.from.to_string().as_str()){
-            dispatch_upgrade(format!("deploy:{}", hash.to_string())).await?;
+            dispatch_upgrade(format!("deploy:{}", hash.encode_hex())).await?;
         }
     }
     Ok(())
