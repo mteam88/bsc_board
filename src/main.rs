@@ -2,12 +2,15 @@ mod dweet;
 
 use ethers::{
     providers::{Middleware, Provider},
-    types::{Transaction, H256},
+    types::Transaction,
 };
 use ethers_providers::{Http, ProviderExt, StreamExt};
 use eyre::Result;
 
 const UPGRADE_SELECTOR: [u8; 4] = 0x99a88ec4_u32.to_be_bytes();
+
+// blocklist set of addresses
+const BLOCKLIST: [&str; 1] = ["0x3852f27ff39e66004b223501f9d24d480b6af3c9"];
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,7 +38,7 @@ async fn digest(tx: Transaction) -> Result<()> {
         if tx.input[0..4] == UPGRADE_SELECTOR {
             // if tx is a contract upgrade, dispatch immediately
             dispatch_upgrade(format!("upgrade:{}", hash.to_string())).await?;
-        } else if tx.to == None {
+        } else if tx.to == None || !BLOCKLIST.contains(&tx.from.to_string().as_str()){
             dispatch_upgrade(format!("deploy:{}", hash.to_string())).await?;
         }
     }
