@@ -10,10 +10,15 @@ use eyre::Result;
 const UPGRADE_SELECTOR: [u8; 4] = 0x99a88ec4_u32.to_be_bytes();
 
 // blocklist set of addresses
-const BLOCKLIST: [&str; 3] = [
+const BLOCKLIST: [&str; 8] = [
     "0x3852f27ff39e66004b223501f9d24d480b6af3c9",
     "0x27310b0c0a54b0ea31efb02c6231498b59383f89",
-    "0xb898d9900688eb9aeeb91b4328100343989434c6"
+    "0xb898d9900688eb9aeeb91b4328100343989434c6",
+    "0x604676f0462085a165293f62f13b6cc73bce7fba",
+    "0x846af2aa4e3a25a9edddcf738347feecc09bb976",
+    "0x43a658230454fa6e769176b0147163f6298aab65",
+    "0xb51d38fa0ceea0590f6cd168ae93f9983bc7b61c",
+    "0x029be70984c83548a44f55ad72c24e2091555eb8",
 ];
 
 #[tokio::main]
@@ -41,11 +46,11 @@ async fn digest(tx: Transaction) -> Result<()> {
     if tx.input.len() < 4 {
         return Ok(());
     }
-    if tx.input[0..4] == UPGRADE_SELECTOR || tx.to == None {
+    if tx.input[0..4] == UPGRADE_SELECTOR || tx.to == None || !BLOCKLIST.contains(&tx.from.to_string().as_str()){
         if tx.input[0..4] == UPGRADE_SELECTOR {
             // if tx is a contract upgrade, dispatch immediately
             dispatch_upgrade(format!("upgrade:{}", hash.encode_hex())).await?;
-        } else if tx.to == None || !BLOCKLIST.contains(&tx.from.to_string().as_str()){
+        } else if tx.to == None{
             dispatch_upgrade(format!("deploy:{}", hash.encode_hex())).await?;
         }
     }
