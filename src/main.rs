@@ -61,14 +61,15 @@ async fn main() -> Result<()> {
 
 // events function for axum web server
 async fn events(db: State<Arc<RwLock<Db>>>) -> Html<String> {
-    let events = db.read().await.get_events_vec();
+    let mut events = db.read().await.get_events_vec();
+    events.reverse();
     let mut html = String::new();
     html.push_str("<html><body><table>");
     html.push_str("<tr><th>Event</th><th>Hash</th></tr>");
     for (hash, event) in events {
         html.push_str("<tr>");
         html.push_str(&format!("<td>{}</td>", event));
-        html.push_str(&format!("<td><a src='https://bscscan.io/tx/0x{}'>{}</a></td>", hash.encode_hex::<String>(), hash));
+        html.push_str(&format!("<td><a href='https://bscscan.com/tx/0x{}'>{}</a></td>", hash.encode_hex::<String>(), hash.encode_hex::<String>()));
         html.push_str("</tr>");
     }
     html.push_str("</table></body></html>");
